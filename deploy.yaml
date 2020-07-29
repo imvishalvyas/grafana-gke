@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - image: grafana/grafana:7.0.4
+        name: grafana
+        ports:
+        - containerPort: 3000
+          name: http
+        volumeMounts:
+          - name: grafana
+            mountPath: /var/lib/grafana
+          - name : grafana-ini
+            mountPath: /etc/grafana/grafana.ini
+            subPath: grafana.ini
+      volumes:
+        - name: grafana-ini
+          configMap:
+            name: grafana-ini
+        - name: grafana
+          persistentVolumeClaim:
+            claimName: grafana
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 472
